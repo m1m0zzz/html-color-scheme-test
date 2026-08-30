@@ -1,23 +1,24 @@
 # html-color-scheme-test
 
-`color-scheme` の宣言方法の違いによって、ブラウザやアプリ内ブラウザ（WebView）の強制ダーク化の挙動がどう変わるかを検証するための静的サイト。
+`color-scheme` の宣言方法の違いによって、ブラウザやアプリ内ブラウザ（WebView）の algorithmic darkening（アルゴリズムによるダーク化）の挙動がどう変わるかを検証するための静的サイト。
 
 ## 検証ケース
 
 | # | 条件 | 確認したいこと |
 | --- | --- | --- |
 | 01 | 宣言なし | ベースライン |
-| 02 | `<meta name="color-scheme" content="light">` | `only` なしで強制ダーク化を防げるか |
+| 02 | `<meta name="color-scheme" content="light">` | `only` なしでアルゴリズムによるダーク化を防げるか |
 | 03 | `<meta name="color-scheme" content="only light">` | `only` による上書き禁止が効くか |
 | 04 | `content="light dark"` + `prefers-color-scheme` 実装 | サイト側のダークテーマが尊重されるか |
 | 05 | `<meta name="color-scheme" content="dark">` | ダーク宣言時の UA 既定スタイル |
 | 06 | CSS の `:root { color-scheme: only light; }` のみ | meta タグと CSS プロパティの差 |
-| 07 | `manifest.json` の `theme_color` / `background_color` | 強制ダーク化に影響するか |
+| 07 | `manifest.json` の `theme_color` / `background_color` | アルゴリズムによるダーク化に影響するか |
 
 ## 各ページの表示項目
 
 - `matchMedia('(prefers-color-scheme: dark)')` と `(light)` の実測値
-- 自動ダーク化の適用有無（`background-color: canvas` かつ `color-scheme: light` の要素の計算値が白かどうかで判定）
+- UA の algorithmic darkening が有効か（probe A: `color-scheme: light` を指定した `background-color: canvas` の要素の計算値で判定）
+- このページの実効カラースキーム（probe B: `color-scheme` を指定せずルートから継承した要素の計算値で判定）
 - `body` の `background-color` / `color` の計算値
 - `navigator.userAgent`（Android WebView の UA には `; wv)` が含まれる）
 
@@ -27,13 +28,22 @@
 
 初回のみ、リポジトリの Settings → Pages で Source を「GitHub Actions」に変更しておく必要がある。設定前に push すると `github-pages` 環境が存在せずワークフローが失敗する。
 
+## 結果の記録
+
+各ケースページには目視結果（ライト / ダーク / 判別不能）のラジオボタンがある。計算値と実際の描画は食い違う可能性があるため、測定値とは別に記録する。
+
+測定結果は各ケースページで Markdown / JSON としてコピーできる。結果は保存しないため、ページごとにその場でコピーする。
+
+クリップボード API が使えない環境では、選択済みの textarea を表示して手動コピーにフォールバックする。
+
 ## 構成
 
 ```
 public/
   index.html          各ケースへのリンク
   style.css           共通スタイル（color-scheme は宣言しない）
-  detect.js           検出スクリプト
+  store.js            コピー処理
+  detect.js           測定と目視記録
   manifest.json       ケース 07 用
   cases/              各検証ページ
 .github/workflows/deploy.yml

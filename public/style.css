@@ -25,3 +25,12 @@ td {
   font-family: monospace;
   word-break: break-all;
 }
+
+button {
+  font: inherit;
+  padding: 0.25rem 0.75rem;
+}
+
+fieldset label {
+  margin-right: 1rem;
+}
