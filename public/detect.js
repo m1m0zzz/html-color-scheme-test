@@ -1,6 +1,64 @@
 (function () {
   var WHITE = 'rgb(255, 255, 255)';
 
+  var COLUMNS = [
+    ['id', 'ケース'],
+    ['prefersDark', 'prefers-color-scheme: dark'],
+    ['probeA', 'probe A'],
+    ['uaDarkening', 'UA の algorithmic darkening'],
+    ['probeB', 'probe B'],
+    ['effectiveScheme', '実効カラースキーム'],
+    ['bodyBackgroundColor', 'body background-color'],
+    ['bodyColor', 'body color'],
+    ['visual', '目視']
+  ];
+
+  function toMarkdown(record) {
+    function cell(value) {
+      if (value === null || value === undefined || value === '') return '未記録';
+      return String(value).replace(/\|/g, '\\|');
+    }
+    var lines = [];
+    lines.push('| ' + COLUMNS.map(function (c) { return c[1]; }).join(' | ') + ' |');
+    lines.push('| ' + COLUMNS.map(function () { return '---'; }).join(' | ') + ' |');
+    lines.push('| ' + COLUMNS.map(function (c) { return cell(record[c[0]]); }).join(' | ') + ' |');
+    lines.push('');
+    lines.push('userAgent: `' + record.userAgent + '`');
+    return lines.join('\n');
+  }
+
+  // クリップボード API は WebView では権限が拒否されることがあるため、
+  // 失敗時は選択済みの textarea を出して手動コピーに切り替える。
+  function copy(text, container) {
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.rows = 8;
+      ta.style.width = '100%';
+      container.innerHTML = '';
+      container.appendChild(document.createTextNode('コピーに失敗しました。以下を手動で選択してください。'));
+      container.appendChild(ta);
+      ta.focus();
+      ta.select();
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        container.textContent = 'コピーしました。';
+      }, fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  function button(label, onClick) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = label;
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
   function probe(colorScheme) {
     var el = document.createElement('div');
     el.style.cssText = 'background-color: canvas; position: absolute; visibility: hidden;';
@@ -100,12 +158,12 @@
   var status = document.createElement('p');
 
   var actions = document.createElement('p');
-  actions.appendChild(window.CST.button('Markdown をコピー', function () {
-    window.CST.copy(window.CST.toMarkdown(record), status);
+  actions.appendChild(button('Markdown をコピー', function () {
+    copy(toMarkdown(record), status);
   }));
   actions.appendChild(document.createTextNode(' '));
-  actions.appendChild(window.CST.button('JSON をコピー', function () {
-    window.CST.copy(window.CST.toJson(record), status);
+  actions.appendChild(button('JSON をコピー', function () {
+    copy(JSON.stringify(record, null, 2), status);
   }));
   result.appendChild(actions);
   result.appendChild(status);
