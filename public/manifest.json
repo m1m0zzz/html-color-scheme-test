@@ -1,0 +1,7 @@
+{
+  "name": "color-scheme test",
+  "start_url": "./cases/07-manifest.html",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff"
+}
