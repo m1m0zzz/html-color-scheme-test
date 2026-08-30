@@ -13,6 +13,7 @@
 | 05 | `<meta name="color-scheme" content="dark">` | ダーク宣言時の UA 既定スタイル |
 | 06 | CSS の `:root { color-scheme: only light; }` のみ | meta タグと CSS プロパティの差 |
 | 07 | `manifest.json` の `theme_color` / `background_color` | アルゴリズムによるダーク化に影響するか |
+| 08 | 宣言なし + `prefers-color-scheme` 実装 | meta タグなしでページのダークテーマが尊重されるか |
 
 ## 各ページの表示項目
 
@@ -42,8 +43,7 @@
 public/
   index.html          各ケースへのリンク
   style.css           共通スタイル（color-scheme は宣言しない）
-  store.js            コピー処理
-  detect.js           測定と目視記録
+  detect.js           測定・目視記録・コピー
   manifest.json       ケース 07 用
   cases/              各検証ページ
 .github/workflows/deploy.yml
